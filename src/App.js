@@ -3,25 +3,18 @@ import { useQuery } from 'react-query';
 import Photo from './Photo';
 import { FaSearch } from 'react-icons/fa';
 
-const clientId = '?client_id=v5wSKgw6sq_2PTU5dI2fEh0fbI4eXmGq-MnOeMJX2TA';
+const clientId = `?client_id=${process.env.REACT_APP_ACCESS_KEY}`;
 const mainUrl = 'https://api.unsplash.com/photos/';
 const searchUrl = 'https://api.unsplash.com/search/photos/';
 
 const fetchPhotos = async () => {
-  try {
-    const { data } = await axios(`${mainUrl}${clientId}`);
-
-    return data;
-  } catch (error) {
-    console.log(error.message);
-  }
+  const { data } = await axios(`${mainUrl}${clientId}`);
+  return data;
 };
 
 function App() {
-  const { isLoading, isError, data, isSuccess, isFetching } = useQuery(
-    'photos',
-    fetchPhotos
-  );
+  const { isLoading, isError, data } = useQuery('photos', fetchPhotos);
+
   if (isError) {
     return <h2 className='loading'>Error...</h2>;
   }
