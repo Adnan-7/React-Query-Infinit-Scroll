@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import InfiniteScroll from 'react-infinite-scroller';
+import { useInfiniteQuery } from 'react-query';
 import axios from 'axios';
 import { useQuery } from 'react-query';
 import Photo from './Photo';
@@ -10,35 +12,51 @@ const searchUrl = 'https://api.unsplash.com/search/photos/';
 
 // App Component
 function App() {
-  const [disa, setDisa] = useState(true);
-  const [page, setPage] = useState(1);
   const [query, setQuery] = useState('');
 
   // Fetch Function
-  const fetchPhotos = async () => {
-    const urlPage = `&page=${page}`;
-    const urlQuery = `&query=${query}`;
+  const fetchPhotos = async ({ pageParam = 1 }) => {
+    // const urlQuery = `&query=${query}`;
+    const urlPage = `&page=${pageParam}`;
 
-    let url;
-    if (query) {
-      url = `${searchUrl}${clientID}${urlPage}${urlQuery}`;
-    } else {
-      url = `${mainUrl}${clientID}${urlPage}`;
-    }
+    let url = `${mainUrl}${clientID}${urlPage}`;
+    // if (query) {
+    //   url = `${searchUrl}${clientID}${pageParam}${urlQuery}`;
+    // } else {
+    //   url = `${mainUrl}${clientID}${pageParam}`;
+    // }
 
-    const { data } = await axios(url);
-    if (query) {
-      return data.results;
-    }
-    return data;
+    const response = await axios(url);
+    // if (query) {
+    //   return data.results;
+    // }
+
+    const { data, headers } = response;
+
+    let totalItems = headers['x-total'];
+
+    let totalPages = Math.ceil(totalItems / 10);
+
+    return { data, nextPage: pageParam + 1, totalPages };
   };
 
   //Use qeury
-  const { isLoading, isError, error, data, refetch } = useQuery(
-    'photos',
-    fetchPhotos
-  );
+  const {
+    data,
+    isLoading,
+    isError,
+    hasNextPage,
+    fetchNextPage,
+    refetch,
+    isFetching,
+  } = useInfiniteQuery('photos', fetchPhotos, {
+    getNextPageParam: (lastPage, pages) => {
+      if (lastPage.nextPage < lastPage.totalPages) return lastPage.nextPage;
+      return undefined;
+    },
+  });
 
+  console.log(data);
   //  Handle Submit
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -62,7 +80,7 @@ function App() {
         </form>
       </section>
 
-      {isLoading ? (
+      {/* {isLoading || isFetching ? (
         <h2 className='loading'>Loading...</h2>
       ) : isError ? (
         <h2 className='loading'>{error.message}</h2>
@@ -74,7 +92,40 @@ function App() {
             })}
           </div>
         </section>
+      )} */}
+
+      {isLoading ? (
+        <h2 className='loading'>Loading...</h2>
+      ) : isError ? (
+        <h2 className='loading'>{error.message}</h2>
+      ) : (
+        <section className='photos'>
+          <InfiniteScroll hasMore={hasNextPage} loadMore={fetchNextPage}>
+            <div className='photos-center'>
+              {data.pages.map((page) =>
+                page.data.map((photo, index) => {
+                  return <Photo key={index} {...photo} />;
+                })
+              )}
+            </div>
+          </InfiniteScroll>
+          {isFetching && <h2 className='loading'>Loading...</h2>}
+        </section>
       )}
+
+      {/* {isLoading ? (
+        <h2 className='loading'>Loading...</h2>
+      ) : isError ? (
+        <h2 className='loading'>{error.message}</h2>
+      ) : (
+        <section className='photos'>
+          <div className='photos-center'>
+            {data.pages.map((page) => {
+              page.data.map((p) => <h2>hello</h2>);
+            })}
+          </div>
+        </section>
+      )} */}
     </main>
   );
 }
