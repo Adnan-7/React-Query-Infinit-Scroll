@@ -16,28 +16,40 @@ function App() {
 
   // Fetch Function
   const fetchPhotos = async ({ pageParam = 1 }) => {
-    // const urlQuery = `&query=${query}`;
+    const urlQuery = `&query=${query}`;
     const urlPage = `&page=${pageParam}`;
 
-    let url = `${mainUrl}${clientID}${urlPage}`;
-    // if (query) {
-    //   url = `${searchUrl}${clientID}${pageParam}${urlQuery}`;
-    // } else {
-    //   url = `${mainUrl}${clientID}${pageParam}`;
-    // }
+    let url;
+    if (query) {
+      url = `${searchUrl}${clientID}${urlPage}${urlQuery}`;
+    } else {
+      url = `${mainUrl}${clientID}${urlPage}`;
+    }
 
     const response = await axios(url);
-    // if (query) {
-    //   return data.results;
-    // }
 
     const { data, headers } = response;
-
     let totalItems = headers['x-total'];
 
     let totalPages = Math.ceil(totalItems / 10);
 
-    return { data, nextPage: pageParam + 1, totalPages };
+    if (query) {
+      console.log({ data: data.results, nextPage: pageParam + 1, totalPages });
+      return { data: data.results, nextPage: pageParam + 1, totalPages };
+    } else {
+      console.log({ data: data, nextPage: pageParam + 1, totalPages });
+      return { data, nextPage: pageParam + 1, totalPages };
+    }
+
+    // let totalItems = headers['x-total'];
+
+    // let totalPages = Math.ceil(totalItems / 10);
+
+    // if (query) {
+    //   let data = data.results;
+    //   return { data, nextPage: pageParam + 1, totalPages };
+    // }
+    // return { data, nextPage: pageParam + 1, totalPages };
   };
 
   //Use qeury
@@ -56,7 +68,6 @@ function App() {
     },
   });
 
-  console.log(data);
   //  Handle Submit
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -129,5 +140,4 @@ function App() {
     </main>
   );
 }
-
 export default App;
