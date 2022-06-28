@@ -40,16 +40,6 @@ function App() {
       console.log({ data: data, nextPage: pageParam + 1, totalPages });
       return { data, nextPage: pageParam + 1, totalPages };
     }
-
-    // let totalItems = headers['x-total'];
-
-    // let totalPages = Math.ceil(totalItems / 10);
-
-    // if (query) {
-    //   let data = data.results;
-    //   return { data, nextPage: pageParam + 1, totalPages };
-    // }
-    // return { data, nextPage: pageParam + 1, totalPages };
   };
 
   //Use qeury
@@ -71,6 +61,7 @@ function App() {
   //  Handle Submit
   const handleSubmit = (e) => {
     e.preventDefault();
+
     refetch();
   };
 
@@ -91,26 +82,13 @@ function App() {
         </form>
       </section>
 
-      {/* {isLoading || isFetching ? (
-        <h2 className='loading'>Loading...</h2>
-      ) : isError ? (
-        <h2 className='loading'>{error.message}</h2>
-      ) : (
-        <section className='photos'>
-          <div className='photos-center'>
-            {data?.map((photo, index) => {
-              return <Photo key={index} {...photo} />;
-            })}
-          </div>
-        </section>
-      )} */}
-
       {isLoading ? (
         <h2 className='loading'>Loading...</h2>
       ) : isError ? (
         <h2 className='loading'>{error.message}</h2>
       ) : (
         <section className='photos'>
+          {isFetching && <h2 className='loading'>Loading...</h2>}
           <InfiniteScroll hasMore={hasNextPage} loadMore={fetchNextPage}>
             <div className='photos-center'>
               {data.pages.map((page) =>
@@ -123,20 +101,6 @@ function App() {
           {isFetching && <h2 className='loading'>Loading...</h2>}
         </section>
       )}
-
-      {/* {isLoading ? (
-        <h2 className='loading'>Loading...</h2>
-      ) : isError ? (
-        <h2 className='loading'>{error.message}</h2>
-      ) : (
-        <section className='photos'>
-          <div className='photos-center'>
-            {data.pages.map((page) => {
-              page.data.map((p) => <h2>hello</h2>);
-            })}
-          </div>
-        </section>
-      )} */}
     </main>
   );
 }
